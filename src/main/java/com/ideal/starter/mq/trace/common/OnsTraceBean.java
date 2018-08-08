@@ -5,7 +5,6 @@ import com.ideal.starter.mq.trace.utils.MixUtils;
 import org.apache.rocketmq.common.message.MessageType;
 
 /**
- * Created by alvin on 16-3-9.
  */
 public class OnsTraceBean {
     private static String LOCAL_ADDRESS = MixUtils.getLocalAddress();

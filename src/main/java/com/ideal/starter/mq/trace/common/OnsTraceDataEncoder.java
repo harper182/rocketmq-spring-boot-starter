@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Created by alvin on 16-3-10.
- */
 public class OnsTraceDataEncoder {
     /**
      * 从轨迹数据字符串中解析出traceContext列表

@@ -27,7 +27,6 @@ import java.util.Properties;
 import java.util.UUID;
 
 /**
- * Created by suclogger on 2017/6/28.
  * 自动装配消息消费者
  */
 @Slf4j
@@ -98,6 +97,8 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
             consumer.setInstanceName(UUID.randomUUID().toString());
             consumer.setVipChannelEnabled(mqProperties.getVipChannelEnabled());
             consumer.setMaxReconsumeTimes(mqProperties.getMaxReconsumeTimes());
+            consumer.setHeartbeatBrokerInterval(mqProperties.getHeartbeatBrokerInterval());
+
             AbstractMQPushConsumer abstractMQPushConsumer = (AbstractMQPushConsumer) bean;
             if (MessageExtConst.CONSUME_MODE_CONCURRENTLY.equals(mqConsumer.consumeMode())) {
                 consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) ->

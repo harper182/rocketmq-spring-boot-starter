@@ -3,16 +3,16 @@ package com.ideal.starter.mq.base;
 import com.ideal.starter.mq.MQException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
-import org.apache.rocketmq.client.producer.MessageQueueSelector;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.*;
 import org.apache.rocketmq.client.producer.selector.SelectMessageQueueByHash;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.common.message.MessageQueue;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Created by yipin on 2017/6/27.
  * RocketMQ的生产者的抽象基类
  */
 @Slf4j
@@ -31,15 +31,8 @@ public abstract class AbstractMQProducer {
      * @param message  消息体
      * @throws MQException 消息异常
      */
-    public void syncSend(Message message) throws MQException {
-        try {
-            SendResult sendResult = producer.send(message);
-            log.debug("send rocketmq message ,messageId : {}", sendResult.getMsgId());
-            this.doAfterSyncSend(message, sendResult);
-        } catch (Exception e) {
-            log.error("消息发送失败，topic : {}, msgObj {}", message.getTopic(), message);
-            throw new MQException("消息发送失败，topic :" + message.getTopic() + ",e:" + e.getMessage());
-        }
+    public SendResult syncSend(Message message) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
+        return producer.send(message);
     }
 
 
@@ -49,27 +42,15 @@ public abstract class AbstractMQProducer {
      * @param hashKey  用于hash后选择queue的key
      * @throws MQException 消息异常
      */
-    public void syncSendOrderly(Message message, String hashKey) throws MQException {
+    public SendResult syncSendOrderly(Message message, String hashKey) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
         if(StringUtils.isEmpty(hashKey)) {
             // fall back to normal
-            syncSend(message);
+            return syncSend(message);
+        }else {
+            throw new MQException("hashKey is empty");
         }
-        try {
-            SendResult sendResult = producer.send(message, messageQueueSelector, hashKey);
-            log.debug("send rocketmq message orderly ,messageId : {}", sendResult.getMsgId());
-            this.doAfterSyncSend(message, sendResult);
-        } catch (Exception e) {
-            log.error("顺序消息发送失败，topic : {}, msgObj {}", message.getTopic(), message);
-            throw new MQException("顺序消息发送失败，topic :" + message.getTopic() + ",e:" + e.getMessage());
-        }
-    }
 
-    /**
-     * 重写此方法处理发送后的逻辑
-     * @param message  发送消息体
-     * @param sendResult  发送结果
-     */
-    public void doAfterSyncSend(Message message, SendResult sendResult) {}
+    }
 
     /**
      * 异步发送消息
@@ -77,13 +58,51 @@ public abstract class AbstractMQProducer {
      * @param sendCallback 回调
      * @throws MQException 消息异常
      */
-    public void asyncSend(Message message, SendCallback sendCallback) throws MQException {
-        try {
-            producer.send(message, sendCallback);
-            log.debug("send rocketmq message async");
-        } catch (Exception e) {
-            log.error("消息发送失败，topic : {}, msgObj {}", message.getTopic(), message);
-            throw new MQException("消息发送失败，topic :" + message.getTopic() + ",e:" + e.getMessage());
-        }
+    public void asyncSend(Message message, SendCallback sendCallback) throws RemotingException, MQClientException, InterruptedException {
+        producer.send(message, sendCallback);
+    }
+
+    public SendResult send(Message msg, MessageQueue mq) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+        return producer.send(msg, mq);
+    }
+
+    public SendResult send(Message msg, MessageQueue mq, long timeout) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+        return producer.send(msg, mq, timeout);
+    }
+
+    public void send(Message msg, MessageQueue mq, SendCallback sendCallback) throws MQClientException, RemotingException, InterruptedException {
+        producer.send(msg, mq, sendCallback);
+    }
+
+    public void send(Message msg, MessageQueue mq, SendCallback sendCallback, long timeout) throws MQClientException, RemotingException, InterruptedException {
+        producer.send(msg, mq, sendCallback, timeout);
+    }
+
+    public void sendOneway(Message msg, MessageQueue mq) throws MQClientException, RemotingException, InterruptedException {
+        producer.sendOneway(msg, mq);
+    }
+
+    public SendResult send(Message msg, MessageQueueSelector selector, Object arg) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+        return producer.send(msg, selector, arg);
+    }
+
+    public SendResult send(Message msg, MessageQueueSelector selector, Object arg, long timeout) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+        return producer.send(msg, selector, arg, timeout);
+    }
+
+    public void send(Message msg, MessageQueueSelector selector, Object arg, SendCallback sendCallback) throws MQClientException, RemotingException, InterruptedException {
+        producer.send(msg, selector, arg, sendCallback);
+    }
+
+    public void send(Message msg, MessageQueueSelector selector, Object arg, SendCallback sendCallback, long timeout) throws MQClientException, RemotingException, InterruptedException {
+        producer.send(msg, selector, arg, sendCallback, timeout);
+    }
+
+    public void sendOneway(Message msg, MessageQueueSelector selector, Object arg) throws MQClientException, RemotingException, InterruptedException {
+        producer.sendOneway(msg, selector, arg);
+    }
+
+    public TransactionSendResult sendMessageInTransaction(Message msg, LocalTransactionExecuter tranExecuter, Object arg) throws MQClientException {
+        throw new RuntimeException("sendMessageInTransaction not implement, please use TransactionMQProducer class");
     }
 }

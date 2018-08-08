@@ -13,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 import java.util.Map;
 
 /**
- * Created by yipin on 2017/6/29.
  * 自动装配消息生产者
  */
 @Slf4j

@@ -1,9 +1,7 @@
 package com.ideal.starter.mq.trace.common;
 
 
-/**
- * Created by alvin on 16-3-8.
- */
+
 public class OnsTraceConstants {
     // 外部直传Nameserver的地址
     public static String NAMESRV_ADDR = "NAMESRV_ADDR";

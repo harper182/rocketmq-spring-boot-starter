@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by yipin on 2017/6/27.
  * RocketMQ的消费者(Push模式)处理消息的接口
  */
 @Slf4j

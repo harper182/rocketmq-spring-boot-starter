@@ -4,7 +4,6 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Created by yipin on 2017/6/28.
  * RocketMQ的配置参数
  */
 @Data
@@ -33,5 +32,7 @@ public class MQProperties {
     private Boolean vipChannelEnabled = Boolean.TRUE;
 
     private int maxReconsumeTimes = 16;
+
+    private int heartbeatBrokerInterval = 30000;
 
 }

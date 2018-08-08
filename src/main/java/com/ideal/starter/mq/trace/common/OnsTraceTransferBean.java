@@ -4,9 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-/**
- * Created by alvin on 16-3-9.
- */
 public class OnsTraceTransferBean {
     private String transData;
     private Set<String> transKey = new HashSet<String>();

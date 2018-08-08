@@ -14,7 +14,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Created by yipin on 2017/6/28.
  * RocketMQ配置文件
  */
 @Configuration

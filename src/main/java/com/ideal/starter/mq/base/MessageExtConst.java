@@ -1,8 +1,6 @@
 package com.ideal.starter.mq.base;
 
-/**
- * Created by suclogger on 2017/11/8.
- */
+
 public class MessageExtConst {
 
     /**

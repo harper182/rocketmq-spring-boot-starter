@@ -17,9 +17,6 @@ import org.slf4j.Logger;
 import java.util.*;
 
 
-/**
- * Created by alvin on 16-3-7.
- */
 public class AsyncTraceAppender extends AsyncAppender {
     private final static Logger clientlog = ClientLogger.getLog();
     /**

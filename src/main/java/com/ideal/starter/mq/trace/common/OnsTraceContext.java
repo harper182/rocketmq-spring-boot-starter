@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 
-/**
- * Created by alvin on 16-3-7.
- */
 public class OnsTraceContext implements Comparable<OnsTraceContext> {
     /**
      * 轨迹数据的类型，Pub,SubBefore,SubAfter

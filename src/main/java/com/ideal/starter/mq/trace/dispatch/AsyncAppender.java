@@ -1,7 +1,6 @@
 package com.ideal.starter.mq.trace.dispatch;
 
 /**
- * Created by alvin on 16-3-7.
  * 数据编码和发送模块
  */
 public abstract class AsyncAppender {

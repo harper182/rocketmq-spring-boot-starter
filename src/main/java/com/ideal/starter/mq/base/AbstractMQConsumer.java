@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  * Description：RocketMQ消费抽象基类
- * Created by Jay Chang on 2017/9/14
  * Modified By：
  */
 @Slf4j

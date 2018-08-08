@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Created by alvin on 16-3-8.
- */
 public class OnsConsumeMessageHookImpl implements ConsumeMessageHook {
     /**
      * 该Hook该由哪个dispatcher发送轨迹数据
