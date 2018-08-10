@@ -57,7 +57,7 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
             tempProperties.put(OnsTraceConstants.AsyncBufferSize, "2048");
             tempProperties.put(OnsTraceConstants.MaxBatchNum, "1");
             tempProperties.put(OnsTraceConstants.WakeUpNum, "1");
-            tempProperties.put(OnsTraceConstants.NAMESRV_ADDR, mqProperties.getNameServerAddress());
+            tempProperties.put(OnsTraceConstants.NAMESRV_ADDR, mqProperties.getNamesrvAddr());
             tempProperties.put(OnsTraceConstants.InstanceName, UUID.randomUUID().toString());
             AsyncTraceAppender asyncAppender = new AsyncTraceAppender(tempProperties);
             asyncTraceDispatcher = new AsyncTraceDispatcher(tempProperties);
@@ -70,7 +70,7 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
 
     private void publishConsumer(String beanName, Object bean) throws Exception {
         MQConsumer mqConsumer = applicationContext.findAnnotationOnBean(beanName, MQConsumer.class);
-        if (StringUtils.isEmpty(mqProperties.getNameServerAddress())) {
+        if (StringUtils.isEmpty(mqProperties.getNamesrvAddr())) {
             throw new RuntimeException("name server address must be defined");
         }
         Assert.notNull(mqConsumer.consumerGroup(), "consumer's consumerGroup must be defined");
@@ -91,14 +91,11 @@ public class MQConsumerAutoConfiguration extends MQBaseAutoConfiguration {
         // 配置push consumer
         if (AbstractMQPushConsumer.class.isAssignableFrom(bean.getClass())) {
             DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(consumerGroup);
-            consumer.setNamesrvAddr(mqProperties.getNameServerAddress());
+            consumer.setNamesrvAddr(mqProperties.getNamesrvAddr());
             consumer.setMessageModel(MessageModel.valueOf(mqConsumer.messageMode()));
             consumer.subscribe(topic, StringUtils.join(mqConsumer.tag(), "||"));
             consumer.setInstanceName(UUID.randomUUID().toString());
-            consumer.setVipChannelEnabled(mqProperties.getVipChannelEnabled());
             consumer.setMaxReconsumeTimes(mqProperties.getMaxReconsumeTimes());
-            consumer.setHeartbeatBrokerInterval(mqProperties.getHeartbeatBrokerInterval());
-
             AbstractMQPushConsumer abstractMQPushConsumer = (AbstractMQPushConsumer) bean;
             if (MessageExtConst.CONSUME_MODE_CONCURRENTLY.equals(mqConsumer.consumeMode())) {
                 consumer.registerMessageListener((List<MessageExt> list, ConsumeConcurrentlyContext consumeConcurrentlyContext) ->

@@ -90,7 +90,6 @@ public class MessageBuilder {
             }
         }
 
-//        String str = gson.toJson(message);
         if(StringUtils.isEmpty(topic)) {
             if(StringUtils.isEmpty(getTopic())) {
                 throw new RuntimeException("no topic defined to send this message");

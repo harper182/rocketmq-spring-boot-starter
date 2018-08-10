@@ -32,12 +32,11 @@ public class MQProducerAutoConfiguration extends MQBaseAutoConfiguration {
         }
         if(producer == null) {
             Assert.notNull(mqProperties.getProducerGroup(), "producer group must be defined");
-            Assert.notNull(mqProperties.getNameServerAddress(), "name server address must be defined");
+            Assert.notNull(mqProperties.getNamesrvAddr(), "name server address must be defined");
             producer = new DefaultMQProducer(mqProperties.getProducerGroup());
-            producer.setNamesrvAddr(mqProperties.getNameServerAddress());
+            producer.setNamesrvAddr(mqProperties.getNamesrvAddr());
             producer.setSendMsgTimeout(mqProperties.getSendMsgTimeout());
-            producer.setSendMessageWithVIPChannel(mqProperties.getVipChannelEnabled());
-
+            producer.setSendMessageWithVIPChannel(mqProperties.isVipChannelEnabled());
             producer.start();
         }
         return producer;

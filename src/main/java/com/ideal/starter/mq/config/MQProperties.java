@@ -1,6 +1,7 @@
 package com.ideal.starter.mq.config;
 
 import lombok.Data;
+import org.apache.rocketmq.client.ClientConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -8,11 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Data
 @ConfigurationProperties(prefix = "spring.rocketmq")
-public class MQProperties {
-    /**
-     * config name server address
-     */
-    private String nameServerAddress;
+public class MQProperties extends ClientConfig{
+
     /**
      * config producer group , default to DPG+RANDOM UUID like DPG-fads-3143-123d-1111
      */
@@ -26,13 +24,6 @@ public class MQProperties {
      */
     private Boolean traceEnabled = Boolean.TRUE;
 
-    /**
-     * switch of send message with vip channel
-     */
-    private Boolean vipChannelEnabled = Boolean.TRUE;
-
     private int maxReconsumeTimes = 16;
-
-    private int heartbeatBrokerInterval = 30000;
 
 }

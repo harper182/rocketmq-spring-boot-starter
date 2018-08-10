@@ -33,7 +33,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextMissingProducerGroupConfigure() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.namesrv-addr:127.0.0.1:9876");
         this.context.register(TestProducer.class);
         MQProducerAutoConfiguration.setProducer(null);
         this.context.register(MQProducerAutoConfiguration.class);
@@ -42,7 +42,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextWithoutParent() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.namesrv-addr:127.0.0.1:9876");
         EnvironmentTestUtils.addEnvironment(this.context, "rocketmq.producer-group:test-producer-group");
         this.context.register(TestProducerNoParent.class);
         this.context.register(MQProducerAutoConfiguration.class);
@@ -51,7 +51,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContext() {
         this.context = new AnnotationConfigApplicationContext();
-        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.name-server-address:127.0.0.1:9876");
+        EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.namesrv-addr:127.0.0.1:9876");
         EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.producer-group:test-producer-group");
         this.context.register(TestProducer.class);
         this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);

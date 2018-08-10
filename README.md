@@ -18,9 +18,6 @@
 * [x] 消息tag和key支持
 * [x] 自动序列化和反序列化消息体
 * [x] 消息的实际消费方IP追溯
-* [ ] ...
-* [x] ~~发送即忘消息~~（可能由于直接抛弃所有异常导致消息静默丢失，弃用）
-* [x] ~~拉取方式消费~~（配置方式复杂，位点可能发生偏移，弃用）
 
 
 
@@ -31,7 +28,7 @@
 
 ```java
 <dependency>
-    <groupId>com.maihaoche</groupId>
+    <groupId>com.ideal</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
     <version>0.0.7</version>
 </dependency>
@@ -42,7 +39,7 @@
 ```java
 spring:
     rocketmq:
-      name-server-address: 172.21.10.111:9876
+      namesrv-addr: 172.21.10.111:9876
       # 可选, 如果无需发送消息则忽略该配置
       producer-group: local_pufang_producer
       # 发送超时配置毫秒数, 可选, 默认3000
@@ -51,6 +48,11 @@ spring:
       #trace-enabled: false
       # 是否启用VIP通道，默认打开
       #vip-channel-enabled: false
+      #max-reconsume-times:
+      #instanceName
+      #poll-name-server-interval:
+      #heartbeat-broker-interval:
+      #persist-consumer-offset-interval:
 ```
 ##### 3. 程序入口添加注解开启自动装配
 
@@ -65,7 +67,7 @@ class DemoApplication {
 
 ##### 4. 构建消息体
 
-通过我们提供的`Builder`类创建消息对象，详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/构建消息体)
+通过我们提供的`Builder`类创建消息对象
 
 
 ```java
@@ -74,8 +76,6 @@ MessageBuilder.of(new MSG_POJO()).topic("some-msg-topic").build();
 
 
 ##### 5. 创建发送方
-
-详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Provider)：
 
 
 ```java
@@ -86,11 +86,10 @@ public class DemoProducer extends AbstractMQProducer{
 
 ##### 6. 创建消费方
 
-详见[wiki](https://github.com/maihaoche/rocketmq-spring-boot-starter/wiki/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-Consumer)：
-**支持配置项解析**，如存在`suclogger-test-cluster`配置项，会优先将topic解析为配置项对应的值。
+**支持配置项解析**，如存在`test-cluster`配置项，会优先将topic解析为配置项对应的值。
 
 ```java
-@MQConsumer(topic = "suclogger-test-cluster", consumerGroup = "local_sucloger_dev")
+@MQConsumer(topic = "test-cluster", consumerGroup = "local_sucloger_dev")
 public class DemoConsumer extends AbstractMQPushConsumer {
 
     @Override
