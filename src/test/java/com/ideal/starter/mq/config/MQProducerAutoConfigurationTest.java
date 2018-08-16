@@ -94,8 +94,6 @@ public class MQProducerAutoConfigurationTest {
         assertEquals(dp.getNamesrvAddr(), "127.0.0.1:9876");
     }
 
-
-
     @Component
     @MQProducer
     static class TestProducer extends AbstractMQProducer {

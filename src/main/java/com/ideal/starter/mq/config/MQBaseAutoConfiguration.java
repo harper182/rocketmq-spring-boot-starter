@@ -2,7 +2,6 @@ package com.ideal.starter.mq.config;
 
 import com.ideal.starter.mq.annotation.EnableMQConfiguration;
 import com.ideal.starter.mq.base.AbstractMQProducer;
-import com.ideal.starter.mq.base.AbstractMQPushConsumer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -18,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnBean(annotation = EnableMQConfiguration.class)
-@AutoConfigureAfter({AbstractMQProducer.class, AbstractMQPushConsumer.class})
+@AutoConfigureAfter({AbstractMQProducer.class})
 @EnableConfigurationProperties(MQProperties.class)
 public class MQBaseAutoConfiguration implements ApplicationContextAware {
     protected MQProperties mqProperties;

@@ -1,6 +1,7 @@
 package com.ideal.starter.mq.annotation;
 
 import com.ideal.starter.mq.base.MessageExtConst;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
@@ -8,12 +9,13 @@ import java.lang.annotation.*;
 /**
  * RocketMQ消费者自动装配注解
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
-public @interface MQConsumer {
+public @interface RocketMQConsumerListener {
     String consumerGroup();
+
     String topic();
 
     /**
@@ -23,11 +25,7 @@ public @interface MQConsumer {
      */
     String messageMode() default MessageExtConst.MESSAGE_MODE_CLUSTERING;
 
-    /**
-     * 使用线程池并发消费: CONCURRENTLY("CONCURRENTLY"),
-     * 单线程消费: ORDERLY("ORDERLY");
-     * @return 消费模式
-     */
-    String consumeMode() default MessageExtConst.CONSUME_MODE_CONCURRENTLY;
-    String[] tag() default {"*"};
+    String tag() default "*";
+
+    Class messageType() default String.class;
 }
