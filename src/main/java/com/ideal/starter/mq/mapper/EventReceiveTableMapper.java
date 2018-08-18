@@ -2,14 +2,11 @@ package com.ideal.starter.mq.mapper;
 
 import com.ideal.starter.mq.model.EventReceiveStatus;
 import com.ideal.starter.mq.model.EventReceiveTable;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 import java.util.List;
 
-@Mapper
 public interface EventReceiveTableMapper {
     List<EventReceiveTable> findAll();
 

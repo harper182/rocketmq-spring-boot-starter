@@ -11,10 +11,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
 
 /**
  * RocketMQ配置文件
@@ -24,8 +23,7 @@ import org.springframework.context.annotation.ImportResource;
 @AutoConfigureAfter({AbstractMQProducer.class})
 @EnableConfigurationProperties(MQProperties.class)
 @ComponentScan("com.ideal.starter.mq")
-@ImportResource("classpath:base-mybatis.xml")
-@Import(MyBatisConfig.class)
+@MapperScan(basePackages = "com.ideal.start.mq.mapper")
 public class MQBaseAutoConfiguration implements ApplicationContextAware {
     protected MQProperties mqProperties;
 
@@ -39,6 +37,11 @@ public class MQBaseAutoConfiguration implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
+    }
+
+    @Bean
+    public ListenerInfoCache listenerInfoCache() {
+        return new ListenerInfoCache();
     }
 
 }

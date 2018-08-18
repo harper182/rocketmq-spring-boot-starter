@@ -25,7 +25,8 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextEmpty() {
         this.context = new AnnotationConfigApplicationContext();
-        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class, PooledDataSource.class, DefaultSqlSessionFactory.class,Configuration.class);
+        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class, PooledDataSource.class, DefaultSqlSessionFactory.class,Configuration.class,
+                DefaultSqlSessionFactory.class);
         this.context.refresh();
     }
 

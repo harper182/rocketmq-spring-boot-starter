@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.ideal.starter.mq.model.EventReceiveTableMapper">
+<mapper namespace="com.ideal.starter.mq.mapper.EventReceiveTableMapper">
     <resultMap id="BaseResultMap" type="com.ideal.starter.mq.model.EventReceiveTable">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="topic" property="topic" jdbcType="VARCHAR"/>
@@ -13,12 +13,12 @@
         <result column="lastModifyTime" property="lastModifyTime" jdbcType="TIMESTAMP"/>
         <result column="retryTime" property="retryTime" jdbcType="INTEGER"/>
         <result column="modifyNumber" property="modifyNumber" jdbcType="INTEGER"/>
-        <result column="extInfo" property="extInfo" jdbcType="VARCHAR"/>
+        <result column="message" property="message" jdbcType="VARCHAR"/>
         <result column="msgId" property="msgId" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List" >
         id, topic, tag, eventStatus,
-        lastModifyTime,retryTime,modifyNumber,extInfo,msgId
+        lastModifyTime,retryTime,modifyNumber,message,msgId
     </sql>
     <select id="findAll" resultMap="BaseResultMap"  >
         SELECT
@@ -34,9 +34,9 @@
 
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
         INSERT INTO event_receive_table(topic, tag, eventStatus,receiveTime,
-        lastModifyTime,retryTime,modifyNumber,extInfo,msgId) VALUES (
+        lastModifyTime,retryTime,modifyNumber,message,msgId) VALUES (
         #{topic},#{tag},#{eventStatus},#{receiveTime},#{lastModifyTime},
-        #{retryTime},#{modifyNumber},#{extInfo},#{msgId}
+        #{retryTime},#{modifyNumber},#{message},#{msgId}
         )
     </update>
     <select id="getDomainEventsBeforeDate" resultMap="BaseResultMap">

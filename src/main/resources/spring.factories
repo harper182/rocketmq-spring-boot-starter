@@ -1,1 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.ideal.starter.mq.config.MQProducerAutoConfiguration,com.ideal.starter.mq.config.RocketMQListenerConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration, \
+    com.ideal.starter.mq.config.MQProducerAutoConfiguration,\
+    com.ideal.starter.mq.config.RocketMQListenerConfiguration
