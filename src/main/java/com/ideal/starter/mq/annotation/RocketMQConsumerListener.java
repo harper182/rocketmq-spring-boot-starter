@@ -14,7 +14,7 @@ import java.lang.annotation.*;
 @Documented
 @Component
 public @interface RocketMQConsumerListener {
-    String consumerGroup();
+    String consumerGroup() default "DEFAULT_CONSUMER_GROUP";
 
     String topic();
 

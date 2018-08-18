@@ -6,6 +6,9 @@ import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.base.AbstractMQProducer;
 import com.ideal.starter.mq.base.RocketMQConsumerContainer;
 import com.ideal.starter.mq.base.SimpleConsumer;
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.junit.After;
 import org.junit.Test;
@@ -23,7 +26,7 @@ public class RocketMQConsumerListenerAutoConfigurationTest {
         this.context = new AnnotationConfigApplicationContext();
         EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.namesrv-addr:127.0.0.1:9876");
         this.context.register(TestConsumer.class);
-        this.context.register(RocketMQListenerConfiguration.class,MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
+        this.context.register(RocketMQListenerConfiguration.class,MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class, DefaultSqlSessionFactory.class,PooledDataSource.class, DefaultSqlSessionFactory.class,Configuration.class);
         this.context.refresh();
     }
 

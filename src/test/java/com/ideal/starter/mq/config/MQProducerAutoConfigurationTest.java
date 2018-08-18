@@ -2,12 +2,18 @@ package com.ideal.starter.mq.config;
 
 import com.ideal.starter.mq.annotation.MQProducer;
 import com.ideal.starter.mq.base.AbstractMQProducer;
+import org.apache.ibatis.datasource.pooled.PooledDataSource;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -19,7 +25,7 @@ public class MQProducerAutoConfigurationTest {
 
     private void prepareApplicationContextEmpty() {
         this.context = new AnnotationConfigApplicationContext();
-        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
+        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class, PooledDataSource.class, DefaultSqlSessionFactory.class,Configuration.class);
         this.context.refresh();
     }
 
@@ -54,7 +60,7 @@ public class MQProducerAutoConfigurationTest {
         EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.namesrv-addr:127.0.0.1:9876");
         EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.producer-group:test-producer-group");
         this.context.register(TestProducer.class);
-        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class);
+        this.context.register(MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class,PooledDataSource.class, DefaultSqlSessionFactory.class,Configuration.class);
         this.context.refresh();
     }
 

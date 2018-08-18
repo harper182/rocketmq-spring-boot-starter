@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ideal.starter.mq.model.EventSendTableMapper">
+    <resultMap id="BaseResultMap" type="com.ideal.starter.mq.model.EventSendTable">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="topic" property="topic" jdbcType="VARCHAR"/>
+        <result column="tag" property="tag" jdbcType="VARCHAR"/>
+        <result column="eventStatus" property="eventStatus" jdbcType="VARCHAR"/>
+        <result column="sendTime" property="sendTime" jdbcType="TIMESTAMP"/>
+        <result column="lastModifyTime" property="lastModifyTime" jdbcType="TIMESTAMP"/>
+        <result column="retryTime" property="retryTime" jdbcType="INTEGER"/>
+        <result column="modifyNumber" property="modifyNumber" jdbcType="INTEGER"/>
+        <result column="extInfo" property="extInfo" jdbcType="VARCHAR"/>
+        <result column="msgId" property="msgId" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, topic, tag, eventStatus, sendTime,
+        lastModifyTime,retryTime,modifyNumber,extInfo,msgId
+    </sql>
+    <select id="findAll" resultMap="BaseResultMap"  >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM event_send_table
+    </select>
+    <select id="getById" resultMap="BaseResultMap"  >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM event_send_table
+        WHERE id = #{id}
+    </select>
+
+    <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
+        INSERT INTO event_send_table(topic, tag, eventStatus, sendTime,
+        lastModifyTime,retryTime,modifyNumber,extInfo,msgId) VALUES (
+        #{topic},#{tag},#{eventStatus},#{sendTime},#{lastModifyTime},
+        #{retryTime},#{modifyNumber},#{extInfo},#{msgId}
+        )
+    </update>
+    <select id="getDomainEventsBeforeDate" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM event_send_table
+        WHERE sendTime &lt; #{sendTime} AND eventStatus = #{eventStatus}
+    </select>
+    <select id="findByMsgIdAndEventStatus" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM event_send_table
+        WHERE msgId = #{msgId} AND eventStatus = #{eventStatus}
+    </select>
+    <update id="updateEventTableStatus">
+        UPDATE event_send_table
+        <set>
+            eventStatus = #{eventStatus,jdbcType=VARCHAR},
+            modifyNumber = modifyNumber + 1,
+            <if test="msgId != null">
+                msgId = #{msgId,jdbcType=VARCHAR},
+            </if>
+            <if test="sendTime != null">
+                sendTime = #{sendTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastModifyTime != null">
+                lastModifyTime = #{lastModifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="retryTime != null">
+                retryTime = retryTime + #{retryTime,jdbcType=INTEGER},
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

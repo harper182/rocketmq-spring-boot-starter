@@ -4,6 +4,7 @@ import com.ideal.starter.mq.annotation.EnableRocketMQListener;
 import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.base.MethodInfo;
 import com.ideal.starter.mq.base.RocketMQConsumerContainer;
+import com.ideal.starter.mq.service.DomainEventDispatcherService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.springframework.beans.BeansException;
@@ -16,6 +17,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.lang.reflect.Method;
@@ -34,7 +37,13 @@ public class RocketMQListenerConfiguration implements ApplicationContextAware, I
     private ConfigurableApplicationContext applicationContext;
 
     protected MQProperties mqProperties;
+    @Autowired
+    private ListenerInfoCache listenerInfoCache;
 
+    @Bean
+    public ListenerInfoCache listenerInfoCache(){
+        return new ListenerInfoCache();
+    }
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
@@ -51,7 +60,7 @@ public class RocketMQListenerConfiguration implements ApplicationContextAware, I
                 createRocketMQContainer(messageMode, consumeGroup, consumeGroupEntry.getValue());
             }
         }
-
+        listenerInfoCache.setInfoCaches(messageModeMap);
     }
 
     private void createRocketMQContainer(String messageMode, String consumerGroup, List<MethodInfo> methodInfolist) {
@@ -106,7 +115,6 @@ public class RocketMQListenerConfiguration implements ApplicationContextAware, I
         }
         return consumerGroupMap;
     }
-
     @Autowired
     public void setMqProperties(MQProperties mqProperties) {
         this.mqProperties = mqProperties;
