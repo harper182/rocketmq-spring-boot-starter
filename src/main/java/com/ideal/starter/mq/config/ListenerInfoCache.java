@@ -29,7 +29,7 @@ public class ListenerInfoCache {
             if(!CollectionUtils.isEmpty(consumerGroupMap)){
                 return consumerGroupMap.stream().filter(methodInfo -> {
                     RocketMQConsumerListener annotation = methodInfo.getMethod().getAnnotation(RocketMQConsumerListener.class);
-                    return topic.equals(annotation.consumerGroup()) && tag.equals(annotation.tag());
+                    return topic.equals(annotation.topic()) && tag.equals(annotation.tag());
                 }).collect(Collectors.toList());
             }
         }

@@ -10,13 +10,13 @@ import java.util.List;
 public interface EventReceiveTableMapper {
     List<EventReceiveTable> findAll();
 
-    List<EventReceiveTable> getEventTablesBeforeDate(@Param("receiveTime") Date receiveTime, @Param("eventStatus") EventReceiveStatus eventStatus);
+    List<EventReceiveTable> getEventTablesBeforeDate(@Param("createTime") Date createTime, @Param("eventStatus") EventReceiveStatus eventStatus);
 
     int save(EventReceiveTable eventReceiveTable);
 
     EventReceiveTable getByMsgId(@Param("msgId") String msgId);
 
-    void updateEventTableStatus(@Param("msgId") String msgId, @Param("eventStatus") EventReceiveStatus eventStatus, @Param("receiveTime") Date receiveTime,
+    void updateEventTableStatus(@Param("msgId") String msgId, @Param("eventStatus") EventReceiveStatus eventStatus, @Param("processTime") Date processTime,
                                 @Param("lastModifyTime") Date lastModifyTime, @Param("retryTime") Integer retryTime);
 
 }

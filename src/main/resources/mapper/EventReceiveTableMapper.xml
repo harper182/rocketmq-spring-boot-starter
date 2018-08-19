@@ -9,17 +9,19 @@
         <result column="topic" property="topic" jdbcType="VARCHAR"/>
         <result column="tag" property="tag" jdbcType="VARCHAR"/>
         <result column="eventStatus" property="eventStatus" jdbcType="VARCHAR"/>
-        <result column="receiveTime" property="receiveTime" jdbcType="TIMESTAMP"/>
-        <result column="createdTime" property="createdTime" jdbcType="TIMESTAMP"/>
+        <result column="processTime" property="processTime" jdbcType="TIMESTAMP"/>
+        <result column="createTime" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="lastModifyTime" property="lastModifyTime" jdbcType="TIMESTAMP"/>
         <result column="retryTime" property="retryTime" jdbcType="INTEGER"/>
         <result column="modifyNumber" property="modifyNumber" jdbcType="INTEGER"/>
         <result column="message" property="message" jdbcType="VARCHAR"/>
         <result column="msgId" property="msgId" jdbcType="VARCHAR"/>
+        <result column="consumerGroup" property="consumerGroup" jdbcType="VARCHAR"/>
+        <result column="messageMode" property="messageMode" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, topic, tag, eventStatus,
-        lastModifyTime,retryTime,modifyNumber,message,msgId
+        id, topic, tag, eventStatus,consumerGroup,messageMode,
+        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime
     </sql>
     <select id="findAll" resultMap="BaseResultMap"  >
         SELECT
@@ -34,17 +36,17 @@
     </select>
 
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
-        INSERT INTO event_receive_table(topic, tag, eventStatus,receiveTime,
-        lastModifyTime,retryTime,modifyNumber,message,msgId) VALUES (
-        #{topic},#{tag},#{eventStatus},#{receiveTime},#{lastModifyTime},
-        #{retryTime},#{modifyNumber},#{message},#{msgId}
+        INSERT INTO event_receive_table(topic, tag, eventStatus,processTime,
+        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime,consumerGroup,messageMode) VALUES (
+        #{topic},#{tag},#{eventStatus},#{processTime},#{lastModifyTime},
+        #{retryTime},#{modifyNumber},#{message},#{msgId},#{createTime},#{consumerGroup},#{messageMode}
         )
     </update>
-    <select id="getDomainEventsBeforeDate" resultMap="BaseResultMap">
+    <select id="getEventTablesBeforeDate" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
         FROM event_receive_table
-        WHERE receiveTime &lt; #{receiveTime} AND eventStatus = #{eventStatus}
+        WHERE createTime &lt; #{createTime} AND eventStatus = #{eventStatus}
     </select>
     <select id="findByMsgIdAndEventStatus" resultMap="BaseResultMap">
         SELECT
@@ -60,8 +62,8 @@
             <if test="msgId != null">
                 msgId = #{msgId,jdbcType=VARCHAR},
             </if>
-            <if test="receiveTime != null">
-                receiveTime = #{receiveTime,jdbcType=TIMESTAMP},
+            <if test="processTime != null">
+                processTime = #{processTime,jdbcType=TIMESTAMP},
             </if>
             <if test="lastModifyTime != null">
                 lastModifyTime = #{lastModifyTime,jdbcType=TIMESTAMP},

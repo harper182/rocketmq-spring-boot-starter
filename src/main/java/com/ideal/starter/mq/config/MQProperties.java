@@ -26,4 +26,8 @@ public class MQProperties extends ClientConfig{
 
     private int maxReconsumeTimes = 16;
 
+    private int compensateSendTime = 20;       //unit : minute
+    private int compensateReceiveTime = 20;      //unit :minute
+    private int messageRetryMaxTime = 3;
+
 }

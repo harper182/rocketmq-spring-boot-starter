@@ -2,6 +2,7 @@ package com.ideal.starter.mq.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.mapper.EventReceiveTableMapper;
 import com.ideal.starter.mq.mapper.EventSendTableMapper;
 import com.ideal.starter.mq.model.*;
@@ -54,9 +55,9 @@ public class DomainEventRepository {
         return true;
     }
 
-    public boolean saveNeedToProcessEvents(List<DomainEvent> domainEvents) {
+    public boolean saveNeedToProcessEvents(List<DomainEvent> domainEvents, RocketMQConsumerListener consumerListener) {
         domainEvents.stream().forEach(domainEvent -> {
-            EventReceiveTable eventReceiveTable = this.saveNeedToProcessEvent(domainEvent);
+            EventReceiveTable eventReceiveTable = this.saveNeedToProcessEvent(domainEvent,consumerListener);
             domainEvent.setEventId(eventReceiveTable.getId());
         });
         return true;
@@ -78,10 +79,12 @@ public class DomainEventRepository {
         return eventSendTable;
     }
 
-    private EventReceiveTable saveNeedToProcessEvent(DomainEvent domainEvent) {
+    private EventReceiveTable saveNeedToProcessEvent(DomainEvent domainEvent,RocketMQConsumerListener consumerListener) {
         EventReceiveTable eventReceiveTable = new EventReceiveTable();
         updateTableInfo(domainEvent, eventReceiveTable);
         eventReceiveTable.setEventStatus(EventReceiveStatus.NON_PROCESSED);
+        eventReceiveTable.setConsumerGroup(consumerListener.consumerGroup());
+        eventReceiveTable.setMessageMode(consumerListener.messageMode());
         eventReceiveTableMapper.save(eventReceiveTable);
         return eventReceiveTable;
     }
@@ -90,7 +93,7 @@ public class DomainEventRepository {
         eventTable.setTopic(domainEvent.getTopic());
         eventTable.setTag(domainEvent.getTag());
         eventTable.setLastModifyTime(new Date());
-        eventTable.setCreatedTime(new Date());
+        eventTable.setCreateTime(new Date());
         eventTable.setMsgId(domainEvent.getMsgId());
         try {
             eventTable.setMessage(objectMapper.writeValueAsString(domainEvent));

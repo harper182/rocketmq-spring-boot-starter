@@ -4,11 +4,9 @@ import java.util.Date;
 
 public class BaseEventTable {
     private Integer id;
-    private String messageMode;
-    private String consumerGroup;
     private String topic;
     private String tag;
-    private Date createdTime;
+    private Date createTime;
     private Date lastModifyTime;
     private Integer retryTime = 0;
     private Integer modifyNumber = 0;
@@ -80,27 +78,11 @@ public class BaseEventTable {
         this.msgId = msgId;
     }
 
-    public String getMessageMode() {
-        return messageMode;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setMessageMode(String messageMode) {
-        this.messageMode = messageMode;
-    }
-
-    public String getConsumerGroup() {
-        return consumerGroup;
-    }
-
-    public void setConsumerGroup(String consumerGroup) {
-        this.consumerGroup = consumerGroup;
-    }
-
-    public Date getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(Date createdTime) {
-        this.createdTime = createdTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

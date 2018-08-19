@@ -11,13 +11,14 @@
         <result column="eventStatus" property="eventStatus" jdbcType="VARCHAR"/>
         <result column="sendTime" property="sendTime" jdbcType="TIMESTAMP"/>
         <result column="lastModifyTime" property="lastModifyTime" jdbcType="TIMESTAMP"/>
+        <result column="createTime" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="retryTime" property="retryTime" jdbcType="INTEGER"/>
         <result column="modifyNumber" property="modifyNumber" jdbcType="INTEGER"/>
         <result column="message" property="message" jdbcType="VARCHAR"/>
         <result column="msgId" property="msgId" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List" >
-        id, topic, tag, eventStatus, sendTime,
+        id, topic, tag, eventStatus, sendTime,createTime,
         lastModifyTime,retryTime,modifyNumber,message,msgId
     </sql>
     <select id="findAll" resultMap="BaseResultMap"  >
@@ -34,16 +35,16 @@
 
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
         INSERT INTO event_send_table(topic, tag, eventStatus, sendTime,
-        lastModifyTime,retryTime,modifyNumber,message,msgId) VALUES (
+        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime) VALUES (
         #{topic},#{tag},#{eventStatus},#{sendTime},#{lastModifyTime},
-        #{retryTime},#{modifyNumber},#{message},#{msgId}
+        #{retryTime},#{modifyNumber},#{message},#{msgId},#{createTime}
         )
     </update>
-    <select id="getDomainEventsBeforeDate" resultMap="BaseResultMap">
+    <select id="getEventTablesBeforeDate" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
         FROM event_send_table
-        WHERE sendTime &lt; #{sendTime} AND eventStatus = #{eventStatus}
+        WHERE createTime &lt; #{createTime} AND eventStatus = #{eventStatus}
     </select>
     <select id="findByMsgIdAndEventStatus" resultMap="BaseResultMap">
         SELECT

@@ -107,7 +107,7 @@ public class SimpleConsumer {
                 try {
                     EventReceiveTable receiveTable = domainEventRepository.getEventReceiveTableByMsgId(messageExt.getMsgId());
                     if(receiveTable == null){
-                        domainEventRepository.saveNeedToProcessEvents(Arrays.asList((DomainEvent) object));
+                        domainEventRepository.saveNeedToProcessEvents(Arrays.asList((DomainEvent) object),subscriber);
                     }else if (receiveTable != null && receiveTable.getEventStatus() == EventReceiveStatus.PROCESSED){
                         return;
                     }

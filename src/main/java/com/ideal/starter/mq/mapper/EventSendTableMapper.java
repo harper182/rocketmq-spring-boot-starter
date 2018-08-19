@@ -10,7 +10,7 @@ import java.util.List;
 public interface EventSendTableMapper {
     List<EventSendTable> findAll();
 
-    List<EventSendTable> getEventTablesBeforeDate(@Param("sendTime") Date sendTime, @Param("eventStatus") EventSendStatus eventStatus);
+    List<EventSendTable> getEventTablesBeforeDate(@Param("createTime") Date createTime, @Param("eventStatus") EventSendStatus eventStatus);
 
     int save(EventSendTable eventReceiveTable);
 

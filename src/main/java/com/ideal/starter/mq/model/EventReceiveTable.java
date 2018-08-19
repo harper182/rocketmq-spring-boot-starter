@@ -4,7 +4,9 @@ import java.util.Date;
 
 public class EventReceiveTable extends BaseEventTable{
     private EventReceiveStatus eventStatus;
-    private Date receiveTime;
+    private String messageMode;
+    private String consumerGroup;
+    private Date processTime;
 
     public EventReceiveStatus getEventStatus() {
         return eventStatus;
@@ -14,12 +16,27 @@ public class EventReceiveTable extends BaseEventTable{
         this.eventStatus = eventStatus;
     }
 
-    public Date getReceiveTime() {
-        return receiveTime;
+    public Date getProcessTime() {
+        return processTime;
     }
 
-    public void setReceiveTime(Date receiveTime) {
-        this.receiveTime = receiveTime;
+    public void setProcessTime(Date processTime) {
+        this.processTime = processTime;
     }
 
+    public String getMessageMode() {
+        return messageMode;
+    }
+
+    public void setMessageMode(String messageMode) {
+        this.messageMode = messageMode;
+    }
+
+    public String getConsumerGroup() {
+        return consumerGroup;
+    }
+
+    public void setConsumerGroup(String consumerGroup) {
+        this.consumerGroup = consumerGroup;
+    }
 }
