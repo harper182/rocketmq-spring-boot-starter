@@ -14,9 +14,9 @@ public interface EventReceiveTableMapper {
 
     int save(EventReceiveTable eventReceiveTable);
 
-    EventReceiveTable getById(@Param("id") Integer id);
+    EventReceiveTable getByMsgId(@Param("msgId") String msgId);
 
-    void updateEventTableStatus(@Param("id") Integer id, @Param("eventStatus") EventReceiveStatus eventStatus, @Param("msgId") String msgId, @Param("receiveTime") Date receiveTime,
+    void updateEventTableStatus(@Param("msgId") String msgId, @Param("eventStatus") EventReceiveStatus eventStatus, @Param("receiveTime") Date receiveTime,
                                 @Param("lastModifyTime") Date lastModifyTime, @Param("retryTime") Integer retryTime);
 
 }

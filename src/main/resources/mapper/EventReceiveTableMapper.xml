@@ -10,6 +10,7 @@
         <result column="tag" property="tag" jdbcType="VARCHAR"/>
         <result column="eventStatus" property="eventStatus" jdbcType="VARCHAR"/>
         <result column="receiveTime" property="receiveTime" jdbcType="TIMESTAMP"/>
+        <result column="createdTime" property="createdTime" jdbcType="TIMESTAMP"/>
         <result column="lastModifyTime" property="lastModifyTime" jdbcType="TIMESTAMP"/>
         <result column="retryTime" property="retryTime" jdbcType="INTEGER"/>
         <result column="modifyNumber" property="modifyNumber" jdbcType="INTEGER"/>
@@ -25,11 +26,11 @@
         <include refid="Base_Column_List" />
         FROM event_receive_table
     </select>
-    <select id="getById" resultMap="BaseResultMap"  >
+    <select id="getByMsgId" resultMap="BaseResultMap"  >
         SELECT
         <include refid="Base_Column_List" />
         FROM event_receive_table
-        WHERE id = #{id}
+        WHERE msgId = #{msgId}
     </select>
 
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
@@ -69,6 +70,6 @@
                 retryTime = retryTime + #{retryTime,jdbcType=INTEGER},
             </if>
         </set>
-        WHERE id = #{id,jdbcType=INTEGER}
+        WHERE msgId = #{msgId,jdbcType=INTEGER}
     </update>
 </mapper>

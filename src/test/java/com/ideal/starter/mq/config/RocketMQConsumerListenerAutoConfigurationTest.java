@@ -25,6 +25,7 @@ public class RocketMQConsumerListenerAutoConfigurationTest {
     private void prepareApplicationContext() {
         this.context = new AnnotationConfigApplicationContext();
         EnvironmentTestUtils.addEnvironment(this.context, "spring.rocketmq.namesrv-addr:127.0.0.1:9876");
+//        EnvironmentTestUtils.addEnvironment(this.context, "mapper-locations:classpath*:mapper/*.xml");
         this.context.register(TestConsumer.class);
         this.context.register(RocketMQListenerConfiguration.class,MQBaseAutoConfiguration.class, MQProducerAutoConfiguration.class, DefaultSqlSessionFactory.class,PooledDataSource.class, DefaultSqlSessionFactory.class,Configuration.class);
         this.context.refresh();

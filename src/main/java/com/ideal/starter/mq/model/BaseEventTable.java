@@ -8,6 +8,7 @@ public class BaseEventTable {
     private String consumerGroup;
     private String topic;
     private String tag;
+    private Date createdTime;
     private Date lastModifyTime;
     private Integer retryTime = 0;
     private Integer modifyNumber = 0;
@@ -93,5 +94,13 @@ public class BaseEventTable {
 
     public void setConsumerGroup(String consumerGroup) {
         this.consumerGroup = consumerGroup;
+    }
+
+    public Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
     }
 }

@@ -1,9 +1,10 @@
 package com.ideal.starter.mq.base;
 
-import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.config.MQProperties;
+import com.ideal.starter.mq.service.DomainEventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
@@ -19,6 +20,7 @@ public class RocketMQConsumerContainer implements DisposableBean {
     private List<MethodInfo> subscribers = new ArrayList<>();
     private MQProperties mqProperties;
     private SimpleConsumer consumer;
+    private ApplicationContext applicationContext;
 
     @Override
     public void destroy() throws Exception {
@@ -37,7 +39,7 @@ public class RocketMQConsumerContainer implements DisposableBean {
 
     private synchronized void initConsumer() {
         if (consumer == null) {
-            SimpleConsumer simpleConsumer = new SimpleConsumer(messageMode,consumerGroup,subscribers,mqProperties);
+            SimpleConsumer simpleConsumer = new SimpleConsumer(messageMode,consumerGroup,subscribers,mqProperties,applicationContext);
 
             consumer = simpleConsumer;
             try {
@@ -87,6 +89,14 @@ public class RocketMQConsumerContainer implements DisposableBean {
 
     public void setConsumer(SimpleConsumer consumer) {
         this.consumer = consumer;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 }
 

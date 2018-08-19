@@ -13,8 +13,8 @@ public class MethodInfo {
 
     }
 
-    public void invoke(Object object,MessageExt messageExt) throws InvocationTargetException, IllegalAccessException {
-        method.invoke(bean,new Object[]{object, messageExt});
+    public void invoke(Object object) throws InvocationTargetException, IllegalAccessException {
+        method.invoke(bean,new Object[]{object});
     }
     public MethodInfo(Method method, Object bean) {
         this.method = method;

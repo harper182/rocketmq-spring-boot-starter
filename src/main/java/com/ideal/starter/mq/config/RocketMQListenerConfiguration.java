@@ -38,10 +38,18 @@ public class RocketMQListenerConfiguration implements ApplicationContextAware, I
     @Autowired
     private ListenerInfoCache listenerInfoCache;
 
+//    @Autowired
+//    private DomainEventRepository domainEventRepository;
+
     @Bean
     public ListenerInfoCache listenerInfoCache() {
         return new ListenerInfoCache();
     }
+//    @Bean
+//
+//    public DomainEventRepository domainEventRepository(EventSendTableMapper eventSendTableMapper,EventReceiveTableMapper eventReceiveTableMapper){
+//        return new DomainEventRepositoryImpl(eventSendTableMapper, eventReceiveTableMapper);
+//    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -64,11 +72,13 @@ public class RocketMQListenerConfiguration implements ApplicationContextAware, I
 
     private void createRocketMQContainer(String messageMode, String consumerGroup, List<MethodInfo> methodInfolist) {
         BeanDefinitionBuilder beanBuilder = BeanDefinitionBuilder.rootBeanDefinition(RocketMQConsumerContainer.class);
-
+//        DomainEventRepository domainEventRepository = applicationContext.getBean(DomainEventRepository.class);
         beanBuilder.addPropertyValue("consumerGroup", consumerGroup);
         beanBuilder.addPropertyValue("messageMode", messageMode);
         beanBuilder.addPropertyValue("subscribers", methodInfolist);
         beanBuilder.addPropertyValue("mqProperties", mqProperties);
+        beanBuilder.addPropertyValue("applicationContext", applicationContext);
+//        beanBuilder.addPropertyValue("eventReceiveTableMapper", domainEventRepository);
         beanBuilder.setDestroyMethodName("destroy");
 
         String containerBeanName = String.format("%s_%s", RocketMQConsumerContainer.class.getName(), counter.incrementAndGet());

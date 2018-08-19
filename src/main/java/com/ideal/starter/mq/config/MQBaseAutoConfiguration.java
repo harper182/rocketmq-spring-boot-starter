@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureAfter({AbstractMQProducer.class})
 @EnableConfigurationProperties(MQProperties.class)
 @ComponentScan("com.ideal.starter.mq")
-@MapperScan(basePackages = "com.ideal.start.mq.mapper")
 public class MQBaseAutoConfiguration implements ApplicationContextAware {
     protected MQProperties mqProperties;
 

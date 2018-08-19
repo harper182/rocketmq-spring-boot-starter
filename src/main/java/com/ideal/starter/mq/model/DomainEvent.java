@@ -3,6 +3,7 @@ package com.ideal.starter.mq.model;
 public class DomainEvent {
     private String topic;
     private String tag;
+    private String msgId;
     private Integer eventId;
 
 
@@ -28,6 +29,14 @@ public class DomainEvent {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getMsgId() {
+        return msgId;
+    }
+
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
     public Integer getEventId() {
