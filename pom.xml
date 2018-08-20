@@ -23,7 +23,7 @@
 
     <groupId>com.harper</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
-    <version>1.0.51</version>
+    <version>1.0.57</version>
     <distributionManagement>
         <repository>
             <id>nexus</id>

@@ -21,7 +21,7 @@
     </resultMap>
     <sql id="Base_Column_List" >
         id, topic, tag, eventStatus,consumerGroup,messageMode,
-        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime
+        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime,listenerName
     </sql>
     <select id="findAll" resultMap="BaseResultMap"  >
         SELECT
@@ -38,22 +38,23 @@
         SELECT
         <include refid="Base_Column_List" />
         FROM event_receive_table
-        WHERE msgId = #{msgId} AND listenerName = #{listenerName} and messageMode = #{messageMode} and consumerGroup = #{consumerGroup}
-              and topic = #{topic} and tag = #{tag}
+        WHERE msgId = #{msgId,jdbcType=VARCHAR} AND listenerName = #{listenerName,jdbcType=VARCHAR} and messageMode = #{messageMode,jdbcType=VARCHAR} and consumerGroup = #{consumerGroup,jdbcType=VARCHAR}
+              and topic = #{topic,jdbcType=VARCHAR} and tag = #{tag,jdbcType=VARCHAR}
     </select>
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
         INSERT INTO event_receive_table(topic, tag, eventStatus,processTime,
         lastModifyTime,retryTime,modifyNumber,message,msgId,createTime,consumerGroup,messageMode,listenerName) VALUES (
-        #{topic},#{tag},#{eventStatus},#{processTime},#{lastModifyTime},
-        #{retryTime},#{modifyNumber},#{message},#{msgId},#{createTime},#{consumerGroup},#{messageMode},#{listenerName}
+        #{topic,jdbcType=VARCHAR},#{tag,jdbcType=VARCHAR},#{eventStatus,jdbcType=VARCHAR},#{processTime},#{lastModifyTime,jdbcType=TIMESTAMP},
+        #{retryTime,jdbcType=INTEGER},#{modifyNumber,jdbcType=INTEGER},#{message,jdbcType=VARCHAR},#{msgId,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{consumerGroup,jdbcType=VARCHAR},#{messageMode,jdbcType=VARCHAR},#{listenerName,jdbcType=VARCHAR}
         )
     </update>
     <select id="getEventTablesBeforeDate" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
         FROM event_receive_table
-        WHERE createTime &lt; #{createTime} AND eventStatus = #{eventStatus}
+        WHERE createTime &lt; #{createTime,jdbcType=TIMESTAMP} AND eventStatus = #{eventStatus,jdbcType=VARCHAR} AND retryTime &lt; #{retryTime,jdbcType=INTEGER}
     </select>
+
     <select id="findByMsgIdAndEventStatus" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
@@ -72,10 +73,10 @@
                 lastModifyTime = #{lastModifyTime,jdbcType=TIMESTAMP},
             </if>
             <if test="retryTime != null">
-                retryTime = retryTime + #{retryTime,jdbcType=INTEGER},
+                retryTime = #{retryTime,jdbcType=INTEGER},
             </if>
         </set>
-        WHERE msgId = #{msgId,jdbcType=INTEGER}
+        WHERE msgId = #{msgId,jdbcType=VARCHAR}
     </update>
     <update id="updateReceiveStatusToProcessed">
         UPDATE event_receive_table
@@ -84,8 +85,11 @@
             modifyNumber = modifyNumber + 1,
             processTime = #{processTime,jdbcType=TIMESTAMP},
             lastModifyTime = #{processTime,jdbcType=TIMESTAMP},
+            <if test="retryTime != null">
+                retryTime = #{retryTime,jdbcType=INTEGER},
+            </if>
         </set>
-        WHERE msgId = #{msgId,jdbcType=INTEGER} AND listenerName = #{listenerName} and messageMode = #{messageMode} and consumerGroup = #{consumerGroup}
-        and topic = #{topic} and tag = #{tag}
+        WHERE msgId = #{msgId,jdbcType=VARCHAR} AND listenerName = #{listenerName,jdbcType=VARCHAR} and messageMode = #{messageMode,jdbcType=VARCHAR} and consumerGroup = #{consumerGroup,jdbcType=VARCHAR}
+        and topic = #{topic,jdbcType=VARCHAR} and tag = #{tag,jdbcType=VARCHAR}
     </update>
 </mapper>

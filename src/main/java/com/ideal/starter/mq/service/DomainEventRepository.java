@@ -28,12 +28,15 @@ public class DomainEventRepository {
         updateSendStatus(eventId, eventStatus, null);
     }
 
-    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus, Integer retryTimess) {
-        eventSendTableMapper.updateEventTableStatus(eventId, eventStatus, null, new Date(), new Date(), retryTimess);
+    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus, Integer retryTime) {
+        eventSendTableMapper.updateEventTableStatus(eventId, eventStatus, null, new Date(), new Date(), retryTime);
     }
 
     public void updateReceiveStatusToProcessed(String listenerName ,String messageMode,String consumerGroup,String topic, String tag, String msgId){
-        eventReceiveTableMapper.updateReceiveStatusToProcessed(listenerName ,messageMode, consumerGroup, topic, tag, msgId,EventReceiveStatus.PROCESSED,new Date());
+        this.updateReceiveStatusToProcessed(listenerName, messageMode, consumerGroup, topic, tag, msgId,null);
+    }
+    public void updateReceiveStatusToProcessed(String listenerName ,String messageMode,String consumerGroup,String topic, String tag, String msgId,Integer retryTime){
+        eventReceiveTableMapper.updateReceiveStatusToProcessed(listenerName ,messageMode, consumerGroup, topic, tag, msgId,EventReceiveStatus.PROCESSED,new Date(),retryTime);
     }
 
     public void updateReceiveStatus(String msgId, EventReceiveStatus eventStatus, Integer retryTimess) {
@@ -62,12 +65,12 @@ public class DomainEventRepository {
         return true;
     }
 
-    public List<EventSendTable> getNeedToSendDomainEventList(Date beforeDate, EventSendStatus eventStatus) {
-        return eventSendTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus);
+    public List<EventSendTable> getNeedToSendDomainEventList(Date beforeDate, EventSendStatus eventStatus,int retryTime) {
+        return eventSendTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime);
     }
 
-    public List<EventReceiveTable> getNeedToProcessDomainEventList(Date beforeDate, EventReceiveStatus eventStatus) {
-        return eventReceiveTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus);
+    public List<EventReceiveTable> getNeedToProcessDomainEventList(Date beforeDate, EventReceiveStatus eventStatus,int retryTime) {
+        return eventReceiveTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime);
     }
 
     private EventSendTable saveNeedToSendEvent(DomainEvent domainEvent) {

@@ -30,21 +30,21 @@
         SELECT
         <include refid="Base_Column_List" />
         FROM event_send_table
-        WHERE id = #{id}
+        WHERE id = #{id,jdbcType=INTEGER}
     </select>
 
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
         INSERT INTO event_send_table(topic, tag, eventStatus, sendTime,
         lastModifyTime,retryTime,modifyNumber,message,msgId,createTime) VALUES (
-        #{topic},#{tag},#{eventStatus},#{sendTime},#{lastModifyTime},
-        #{retryTime},#{modifyNumber},#{message},#{msgId},#{createTime}
+        #{topic,jdbcType=VARCHAR},#{tag,jdbcType=VARCHAR},#{eventStatus,jdbcType=VARCHAR},#{sendTime,jdbcType=TIMESTAMP},#{lastModifyTime,jdbcType=TIMESTAMP},
+        #{retryTime,jdbcType=INTEGER},#{modifyNumber,jdbcType=INTEGER},#{message,jdbcType=VARCHAR},#{msgId,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP}
         )
     </update>
     <select id="getEventTablesBeforeDate" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
         FROM event_send_table
-        WHERE createTime &lt; #{createTime} AND eventStatus = #{eventStatus}
+        WHERE createTime &lt; #{createTime,jdbcType=TIMESTAMP} AND retryTime &lt; #{retryTime,jdbcType=INTEGER} AND eventStatus = #{eventStatus,jdbcType=VARCHAR}
     </select>
     <select id="findByMsgIdAndEventStatus" resultMap="BaseResultMap">
         SELECT

@@ -10,7 +10,7 @@ import java.util.List;
 public interface EventReceiveTableMapper {
     List<EventReceiveTable> findAll();
 
-    List<EventReceiveTable> getEventTablesBeforeDate(@Param("createTime") Date createTime, @Param("eventStatus") EventReceiveStatus eventStatus);
+    List<EventReceiveTable> getEventTablesBeforeDate(@Param("createTime") Date createTime, @Param("eventStatus") EventReceiveStatus eventStatus,@Param("retryTime")Integer retryTime);
 
     int save(EventReceiveTable eventReceiveTable);
 
@@ -21,7 +21,9 @@ public interface EventReceiveTableMapper {
     void updateEventTableStatus(@Param("msgId") String msgId, @Param("eventStatus") EventReceiveStatus eventStatus, @Param("processTime") Date processTime,
                                 @Param("lastModifyTime") Date lastModifyTime, @Param("retryTime") Integer retryTime);
 
-    void updateReceiveStatusToProcessed(@Param("listenerName") String listenerName,@Param("messageMode") String messageMode, @Param("consumerGroup") String consumerGroup, @Param("topic") String topic, @Param("tag") String tag,@Param("msgId") String msgId,
-                                        @Param("eventStatus") EventReceiveStatus eventStatus, @Param("processTime") Date processTime);
+    void updateReceiveStatusToProcessed(@Param("listenerName") String listenerName,@Param("messageMode") String messageMode, @Param("consumerGroup") String consumerGroup,
+                                        @Param("topic") String topic, @Param("tag") String tag,@Param("msgId") String msgId,
+                                        @Param("eventStatus") EventReceiveStatus eventStatus, @Param("processTime") Date processTime,
+                                        @Param("retryTime") Integer retryTime);
 
 }
