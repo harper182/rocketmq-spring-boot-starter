@@ -6,6 +6,7 @@ public class EventReceiveTable extends BaseEventTable{
     private EventReceiveStatus eventStatus;
     private String messageMode;
     private String consumerGroup;
+    private String listenerName;
     private Date processTime;
 
     public EventReceiveStatus getEventStatus() {
@@ -38,5 +39,13 @@ public class EventReceiveTable extends BaseEventTable{
 
     public void setConsumerGroup(String consumerGroup) {
         this.consumerGroup = consumerGroup;
+    }
+
+    public String getListenerName() {
+        return listenerName;
+    }
+
+    public void setListenerName(String listenerName) {
+        this.listenerName = listenerName;
     }
 }

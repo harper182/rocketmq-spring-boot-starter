@@ -38,7 +38,7 @@ public class CompensateService {
         List<EventReceiveTable> needToProcessDomainEventList = domainEventRepository.getNeedToProcessDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateSendTime()), EventReceiveStatus.NON_PROCESSED);
         for (EventReceiveTable eventTable : needToProcessDomainEventList) {
             int retryTime = 1;
-            List<MethodInfo> methodInfos = listenerInfoCache.getMethodInfoByListenerInfo(eventTable.getConsumerGroup(), eventTable.getMessageMode(), eventTable.getTopic(), eventTable.getTag());
+            List<MethodInfo> methodInfos = listenerInfoCache.getMethodInfoByListenerInfo(eventTable.getConsumerGroup(), eventTable.getMessageMode(), eventTable.getTopic(), eventTable.getTag(),eventTable.getListenerName());
             if (CollectionUtils.isEmpty(methodInfos)) {
                 continue;
             }

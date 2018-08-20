@@ -3,16 +3,13 @@ package com.ideal.starter.mq.base;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.config.MQProperties;
-import com.ideal.starter.mq.mapper.EventReceiveTableMapper;
 import com.ideal.starter.mq.model.DomainEvent;
-import com.ideal.starter.mq.model.EventReceiveStatus;
 import com.ideal.starter.mq.model.EventReceiveTable;
 import com.ideal.starter.mq.service.DomainEventRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
-import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyContext;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
@@ -22,7 +19,6 @@ import org.springframework.util.Assert;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class SimpleConsumer {
@@ -60,13 +56,13 @@ public class SimpleConsumer {
             consumer.setMaxReconsumeTimes(mqProperties.getMaxReconsumeTimes());
 
             RocketMQConsumerListener mqConsumerListener = null;
-            for(MethodInfo methodInfo: subscribers){
+            for (MethodInfo methodInfo : subscribers) {
                 mqConsumerListener = methodInfo.getMethod().getAnnotation(RocketMQConsumerListener.class);
-                consumer.subscribe(mqConsumerListener.topic(),mqConsumerListener.tag());
+                consumer.subscribe(mqConsumerListener.topic(), mqConsumerListener.tag());
             }
             consumer.setMessageListener(new DefaultMessageListenerConcurrently());
             consumer.start();
-            }
+        }
     }
 
     public void destroy() {
@@ -79,7 +75,7 @@ public class SimpleConsumer {
 
     protected class DefaultMessageListenerConcurrently implements MessageListenerConcurrently {
         public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
-            if(domainEventRepository == null){
+            if (domainEventRepository == null) {
                 domainEventRepository = applicationContext.getBean(DomainEventRepository.class);
             }
             for (MessageExt messageExt : msgs) {
@@ -101,28 +97,29 @@ public class SimpleConsumer {
             RocketMQConsumerListener subscriber = methodInfo.getMethod().getAnnotation(RocketMQConsumerListener.class);
             if (isMatch(subscriber, messageExt)) {
                 Object object = doConvertMessage(messageExt, subscriber.messageType());
-                if(object instanceof DomainEvent){
-                    ((DomainEvent)object).setMsgId(messageExt.getMsgId());
+                if (object instanceof DomainEvent) {
+                    ((DomainEvent) object).setMsgId(messageExt.getMsgId());
+                }
+                EventReceiveTable receiveTable = domainEventRepository.getEventTableByListener(subscriber.name(), subscriber.messageMode(), subscriber.consumerGroup(), subscriber.topic(), subscriber.tag(), messageExt.getMsgId());
+                if (receiveTable == null) {
+                    domainEventRepository.saveNeedToProcessEvents(Arrays.asList((DomainEvent) object), subscriber);
+                } else {
+                    continue;
                 }
                 try {
-                    EventReceiveTable receiveTable = domainEventRepository.getEventReceiveTableByMsgId(messageExt.getMsgId());
-                    if(receiveTable == null){
-                        domainEventRepository.saveNeedToProcessEvents(Arrays.asList((DomainEvent) object),subscriber);
-                    }else if (receiveTable != null && receiveTable.getEventStatus() == EventReceiveStatus.PROCESSED){
-                        return;
-                    }
                     methodInfo.invoke(object);
+                    domainEventRepository.updateReceiveStatusToProcessed(subscriber.name(), subscriber.messageMode(), subscriber.consumerGroup(), subscriber.topic(), subscriber.tag(), messageExt.getMsgId());
                 } catch (InvocationTargetException | IllegalAccessException e) {
-                    e.printStackTrace();
-                    log.error("invoke method {} failed ",methodInfo.getMethod().getName());
+                    log.error("invoke method {} failed ", methodInfo.getMethod().getName());
                 }
+
             }
         }
     }
 
     protected boolean isMatch(RocketMQConsumerListener subscriber, MessageExt messageExt) {
         if (subscriber.topic().equalsIgnoreCase(messageExt.getTopic())) {
-            if(subscriber.tag().equals("*")){
+            if (subscriber.tag().equals("*")) {
                 return true;
             }
             String tags = messageExt.getTags();

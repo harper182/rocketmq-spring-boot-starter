@@ -16,7 +16,12 @@ public interface EventReceiveTableMapper {
 
     EventReceiveTable getByMsgId(@Param("msgId") String msgId);
 
+    EventReceiveTable getEventTableByListener(@Param("listenerName") String listenerName,@Param("messageMode") String messageMode, @Param("consumerGroup") String consumerGroup, @Param("topic") String topic, @Param("tag") String tag,@Param("msgId") String msgId);
+
     void updateEventTableStatus(@Param("msgId") String msgId, @Param("eventStatus") EventReceiveStatus eventStatus, @Param("processTime") Date processTime,
                                 @Param("lastModifyTime") Date lastModifyTime, @Param("retryTime") Integer retryTime);
+
+    void updateReceiveStatusToProcessed(@Param("listenerName") String listenerName,@Param("messageMode") String messageMode, @Param("consumerGroup") String consumerGroup, @Param("topic") String topic, @Param("tag") String tag,@Param("msgId") String msgId,
+                                        @Param("eventStatus") EventReceiveStatus eventStatus, @Param("processTime") Date processTime);
 
 }

@@ -34,12 +34,18 @@
         FROM event_receive_table
         WHERE msgId = #{msgId}
     </select>
-
+    <select id="getEventTableByListener" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM event_receive_table
+        WHERE msgId = #{msgId} AND listenerName = #{listenerName} and messageMode = #{messageMode} and consumerGroup = #{consumerGroup}
+              and topic = #{topic} and tag = #{tag}
+    </select>
     <update id="save" keyProperty="id" useGeneratedKeys="true" parameterType="com.ideal.starter.mq.model.EventReceiveTable" >
         INSERT INTO event_receive_table(topic, tag, eventStatus,processTime,
-        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime,consumerGroup,messageMode) VALUES (
+        lastModifyTime,retryTime,modifyNumber,message,msgId,createTime,consumerGroup,messageMode,listenerName) VALUES (
         #{topic},#{tag},#{eventStatus},#{processTime},#{lastModifyTime},
-        #{retryTime},#{modifyNumber},#{message},#{msgId},#{createTime},#{consumerGroup},#{messageMode}
+        #{retryTime},#{modifyNumber},#{message},#{msgId},#{createTime},#{consumerGroup},#{messageMode},#{listenerName}
         )
     </update>
     <select id="getEventTablesBeforeDate" resultMap="BaseResultMap">
@@ -70,5 +76,16 @@
             </if>
         </set>
         WHERE msgId = #{msgId,jdbcType=INTEGER}
+    </update>
+    <update id="updateReceiveStatusToProcessed">
+        UPDATE event_receive_table
+        <set>
+            eventStatus = #{eventStatus,jdbcType=VARCHAR},
+            modifyNumber = modifyNumber + 1,
+            processTime = #{processTime,jdbcType=TIMESTAMP},
+            lastModifyTime = #{processTime,jdbcType=TIMESTAMP},
+        </set>
+        WHERE msgId = #{msgId,jdbcType=INTEGER} AND listenerName = #{listenerName} and messageMode = #{messageMode} and consumerGroup = #{consumerGroup}
+        and topic = #{topic} and tag = #{tag}
     </update>
 </mapper>

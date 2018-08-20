@@ -22,14 +22,14 @@ public class ListenerInfoCache {
         this.infoCaches = infoCaches;
     }
 
-    public List<MethodInfo> getMethodInfoByListenerInfo(String consumerGroup, String messageMode, String topic, String tag) {
+    public List<MethodInfo> getMethodInfoByListenerInfo(String consumerGroup, String messageMode, String topic, String tag,String listenerName) {
         Map<String, List<MethodInfo>> messageModeMap = infoCaches.get(messageMode);
         if (!CollectionUtils.isEmpty(messageModeMap)) {
             List<MethodInfo> consumerGroupMap = messageModeMap.get(consumerGroup);
             if(!CollectionUtils.isEmpty(consumerGroupMap)){
                 return consumerGroupMap.stream().filter(methodInfo -> {
                     RocketMQConsumerListener annotation = methodInfo.getMethod().getAnnotation(RocketMQConsumerListener.class);
-                    return topic.equals(annotation.topic()) && tag.equals(annotation.tag());
+                    return topic.equals(annotation.topic()) && tag.equals(annotation.tag()) && listenerName.equals(annotation.name());
                 }).collect(Collectors.toList());
             }
         }
