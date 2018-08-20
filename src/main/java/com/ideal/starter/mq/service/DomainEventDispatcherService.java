@@ -41,7 +41,7 @@ public class DomainEventDispatcherService {
             SendResult sendResult = commonProducer.syncSend(event.getTopic() + ":" + event.getTag(), event);
             log.info("sent msg : {}:{}",event.getTopic(),event.getTag());
             if(sendResult.getSendStatus() == SendStatus.SEND_OK){
-                domainEventRepository.updateSendStatus(event.getEventId(), EventSendStatus.SENT);
+                domainEventRepository.updateSendStatus(event.getEventId(), EventSendStatus.SENT,sendResult.getMsgId());
             }
         };
         afterCommitExecutor.execute(runnable);

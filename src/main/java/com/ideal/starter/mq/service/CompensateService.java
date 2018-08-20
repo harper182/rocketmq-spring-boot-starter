@@ -35,7 +35,7 @@ public class CompensateService {
     private MQProperties mqProperties;
 
     public void compensateMessageNeedToProcess() {
-        List<EventReceiveTable> needToProcessDomainEventList = domainEventRepository.getNeedToProcessDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateSendTime()), EventReceiveStatus.NON_PROCESSED,mqProperties.getMessageRetryMaxTime());
+        List<EventReceiveTable> needToProcessDomainEventList = domainEventRepository.getNeedToProcessDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateSendTime()), EventReceiveStatus.NON_PROCESSED,mqProperties.getMessageRetryMaxTime(),mqProperties.getCompensateReceiveLimit());
         for (EventReceiveTable eventTable : needToProcessDomainEventList) {
             int retryTime = 1;
             List<MethodInfo> methodInfos = listenerInfoCache.getMethodInfoByListenerInfo(eventTable.getConsumerGroup(), eventTable.getMessageMode(), eventTable.getTopic(), eventTable.getTag(),eventTable.getListenerName());
@@ -66,14 +66,14 @@ public class CompensateService {
     }
 
     public void compensateMessageNeedToSend() {
-        List<EventSendTable> needToSendDomainEventList = domainEventRepository.getNeedToSendDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateReceiveTime()), EventSendStatus.SEND_WAITING,mqProperties.getMessageRetryMaxTime());
+        List<EventSendTable> needToSendDomainEventList = domainEventRepository.getNeedToSendDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateReceiveTime()), EventSendStatus.SEND_WAITING,mqProperties.getMessageRetryMaxTime(),mqProperties.getCompensateSendLimit());
         needToSendDomainEventList.forEach(domainEvent -> {
             int retryTime = 1;
             while (retryTime <= mqProperties.getMessageRetryMaxTime()) {
                 try {
                     SendResult sendResult = commonProducer.syncSend(domainEvent.getTopic() + ":" + domainEvent.getTag(), domainEvent.getMessage());
                     if (sendResult.getSendStatus() == SendStatus.SEND_OK) {
-                        domainEventRepository.updateSendStatus(domainEvent.getId(), EventSendStatus.SENT, retryTime);
+                        domainEventRepository.updateSendStatus(domainEvent.getId(), EventSendStatus.SENT,sendResult.getMsgId(), retryTime);
                         log.info("compensate message to send successfully,eventId:{},retryTime:{}", domainEvent.getId(), retryTime);
                         break;
                     } else {

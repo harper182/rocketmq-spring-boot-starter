@@ -53,6 +53,7 @@
         <include refid="Base_Column_List" />
         FROM event_receive_table
         WHERE createTime &lt; #{createTime,jdbcType=TIMESTAMP} AND eventStatus = #{eventStatus,jdbcType=VARCHAR} AND retryTime &lt; #{retryTime,jdbcType=INTEGER}
+        ORDER BY createTime ASC limit #{limitCount,jdbcType=INTEGER}
     </select>
 
     <select id="findByMsgIdAndEventStatus" resultMap="BaseResultMap">

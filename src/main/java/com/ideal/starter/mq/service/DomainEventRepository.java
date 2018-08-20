@@ -24,12 +24,12 @@ public class DomainEventRepository {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus) {
-        updateSendStatus(eventId, eventStatus, null);
+    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus,String msgId) {
+        updateSendStatus(eventId, eventStatus, msgId,null);
     }
 
-    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus, Integer retryTime) {
-        eventSendTableMapper.updateEventTableStatus(eventId, eventStatus, null, new Date(), new Date(), retryTime);
+    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus,String msgId, Integer retryTime) {
+        eventSendTableMapper.updateEventTableStatus(eventId, eventStatus, msgId, new Date(), new Date(), retryTime);
     }
 
     public void updateReceiveStatusToProcessed(String listenerName ,String messageMode,String consumerGroup,String topic, String tag, String msgId){
@@ -65,12 +65,12 @@ public class DomainEventRepository {
         return true;
     }
 
-    public List<EventSendTable> getNeedToSendDomainEventList(Date beforeDate, EventSendStatus eventStatus,int retryTime) {
-        return eventSendTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime);
+    public List<EventSendTable> getNeedToSendDomainEventList(Date beforeDate, EventSendStatus eventStatus,int retryTime,int limitCount) {
+        return eventSendTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime,limitCount);
     }
 
-    public List<EventReceiveTable> getNeedToProcessDomainEventList(Date beforeDate, EventReceiveStatus eventStatus,int retryTime) {
-        return eventReceiveTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime);
+    public List<EventReceiveTable> getNeedToProcessDomainEventList(Date beforeDate, EventReceiveStatus eventStatus,int retryTime,int limitCount) {
+        return eventReceiveTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime,limitCount);
     }
 
     private EventSendTable saveNeedToSendEvent(DomainEvent domainEvent) {
