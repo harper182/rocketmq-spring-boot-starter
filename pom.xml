@@ -21,7 +21,7 @@
     <description>spring boot starter for rocketmq</description>
 
 
-    <groupId>com.harper</groupId>
+    <groupId>com.ideal</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
     <version>1.0.60</version>
     <distributionManagement>

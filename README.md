@@ -1,7 +1,5 @@
 # spring boot starter for RocketMQ [![Build Status](https://travis-ci.org/maihaoche/rocketmq-spring-boot-starter.svg?branch=master)](https://travis-ci.org/maihaoche/rocketmq-spring-boot-starter) [![Coverage Status](https://coveralls.io/repos/github/maihaoche/rocketmq-spring-boot-starter/badge.svg?branch=master)](https://coveralls.io/github/maihaoche/rocketmq-spring-boot-starter?branch=master)
 
-<p><a href="http://search.maven.org/#search%7Cga%7C1%7Ccom.maihaoche"><img src="https://maven-badges.herokuapp.com/maven-central/com.maihaoche/spring-boot-starter-rocketmq/badge.svg" alt="Maven Central" style="max-width:100%;"></a><a href="https://github.com/maihaoche/rocketmq-spring-boot-starter/releases"><img src="https://camo.githubusercontent.com/795f06dcbec8d5adcfadc1eb7a8ac9c7d5007fce/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f72656c656173652d646f776e6c6f61642d6f72616e67652e737667" alt="GitHub release" data-canonical-src="https://img.shields.io/badge/release-download-orange.svg" style="max-width:100%;"></a>
-
 
 ### 项目介绍
 
@@ -17,6 +15,7 @@
 * [x] 发送延时消息
 * [x] 消息tag和key支持
 * [x] 自动序列化和反序列化消息体
+* [x] 消息补偿机制
 
 
 
@@ -52,6 +51,16 @@ spring:
       #poll-name-server-interval:
       #heartbeat-broker-interval:
       #persist-consumer-offset-interval:
+      //补偿未发送消息前置事件
+      #compensate-send-time: 10
+      //补偿未处理消息前置事件
+      #compensate-receive-time : 10
+      //补偿消息时重试次数
+      #message-retry-max-time: 4
+      //补偿未发送消息一次处理条数
+      #compensate-send-limit: 100
+      //补偿未处理消息一次处理条数
+      #compensate-receive-limit: 100
 ```
 ##### 3. 程序入口添加注解开启自动装配
 
@@ -60,59 +69,73 @@ spring:
 ```java
 @SpringBootApplication
 @EnableMQConfiguration
-class DemoApplication {
+@MapperScan(basePackages = {"com.harper.rocketmq.mapper","com.ideal.starter.mq.mapper"})
+//com.harper.rocketmq.mapper为自己服务中mapper所在文件夹 
+public class SpringRocketMqApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(SpringRocketMqApplication.class, args);
+    }
 }
 ```
 
 ##### 4. 构建消息体
 
-通过我们提供的`Builder`类创建消息对象
-
-
 ```java
-MessageBuilder.of(new MSG_POJO()).topic("some-msg-topic").build();
-```
-
-
-##### 5. 创建发送方
-
-
-```java
-@MQProducer
-public class DemoProducer extends AbstractMQProducer{
+public class OrderPaidEvent extends DomainEvent {
+    private String orderId;
+    public OrderPaidEvent(String topic, String tag, String orderId) {
+        super(topic, tag);
+        this.orderId = orderId;
+    }
 }
+```
+##### 5 引入发送方（自主发送）
+```java
+ @Autowired
+ private CommonProducer commonProducer;
+
+ //同步发送
+ String topic,tag;
+ SendResult sendResult = commonProducer.syncSend( topic+ ":" + tag, message);
+ 
+ //异步发送
+ commonProducer.asyncSend(String destination, Object payload, SendCallback sendCallback);
 ```
 
 ##### 6. 创建消费方
 
-**支持配置项解析**，如存在`test-cluster`配置项，会优先将topic解析为配置项对应的值。
-
 ```java
-@MQConsumer(topic = "test-cluster", consumerGroup = "local_sucloger_dev")
-public class DemoConsumer extends AbstractMQPushConsumer {
+@EnableRocketMQListener
+public class OrderConsumer {
 
-    @Override
-    public boolean process(Object message, Map extMap) {
-        // extMap 中包含messageExt中的属性和message.properties中的属性
-        System.out.println(message);
-        return true;
+    @Autowired
+    private DomainEventRepository domainEventRepository;
+    @Autowired
+    private AsyncBusinessService businessService;
+
+    @RocketMQConsumerListener(name = "process",topic = "ORDER", consumerGroup = "local_sucloger_dev", tag = "ORDERPAID", messageType = OrderPaidEvent.class)
+    public DomainEvent process(Object object) {
+        OrderPaidEvent paidEvent = (OrderPaidEvent) object;
+        System.out.println("-----------------in process");
+        return paidEvent;
     }
 }
 ```
 
-##### 7. 发送消息：
+##### 7. 保存事件并发送消息：
 
 ```java
-
-// 注入发送者
+// 注入事件分发器
 @Autowired
-private DemoProducer demoProducer;
+private DomainEventDispatcherService domainEventDispatcherService;
     
 ...
     
-// 发送
-demoProducer.syncSend(msg)
+// 保存事件并在事务成功后发送
+domainEventDispatcherService.saveAndDispatcher(orderDomain.getEvents());
     
 ```
+
+
 
 
