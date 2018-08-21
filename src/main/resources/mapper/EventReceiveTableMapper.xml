@@ -23,17 +23,6 @@
         id, topic, tag, eventStatus,consumerGroup,messageMode,
         lastModifyTime,retryTime,modifyNumber,message,msgId,createTime,listenerName
     </sql>
-    <select id="findAll" resultMap="BaseResultMap"  >
-        SELECT
-        <include refid="Base_Column_List" />
-        FROM event_receive_table
-    </select>
-    <select id="getByMsgId" resultMap="BaseResultMap"  >
-        SELECT
-        <include refid="Base_Column_List" />
-        FROM event_receive_table
-        WHERE msgId = #{msgId}
-    </select>
     <select id="getEventTableByListener" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
@@ -62,23 +51,6 @@
         FROM event_receive_table
         WHERE msgId = #{msgId} AND eventStatus = #{eventStatus}
     </select>
-    <update id="updateEventTableStatus">
-        UPDATE event_receive_table
-        <set>
-            eventStatus = #{eventStatus,jdbcType=VARCHAR},
-            modifyNumber = modifyNumber + 1,
-            <if test="processTime != null">
-                processTime = #{processTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="lastModifyTime != null">
-                lastModifyTime = #{lastModifyTime,jdbcType=TIMESTAMP},
-            </if>
-            <if test="retryTime != null">
-                retryTime = #{retryTime,jdbcType=INTEGER},
-            </if>
-        </set>
-        WHERE msgId = #{msgId,jdbcType=VARCHAR}
-    </update>
     <update id="updateReceiveStatusToProcessed">
         UPDATE event_receive_table
         <set>
@@ -86,11 +58,19 @@
             modifyNumber = modifyNumber + 1,
             processTime = #{processTime,jdbcType=TIMESTAMP},
             lastModifyTime = #{processTime,jdbcType=TIMESTAMP},
-            <if test="retryTime != null">
-                retryTime = #{retryTime,jdbcType=INTEGER},
+            <if test="isRetry">
+                retryTime = retryTime+1
             </if>
         </set>
-        WHERE msgId = #{msgId,jdbcType=VARCHAR} AND listenerName = #{listenerName,jdbcType=VARCHAR} and messageMode = #{messageMode,jdbcType=VARCHAR} and consumerGroup = #{consumerGroup,jdbcType=VARCHAR}
-        and topic = #{topic,jdbcType=VARCHAR} and tag = #{tag,jdbcType=VARCHAR}
+        WHERE id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="addNonProcessEventRetryTime">
+        UPDATE event_receive_table
+        <set>
+            modifyNumber = modifyNumber + 1,
+            lastModifyTime = #{lastModifyTime,jdbcType=TIMESTAMP},
+            retryTime = retryTime + 1,
+        </set>
+        WHERE id = #{id,jdbcType=INTEGER}
     </update>
 </mapper>

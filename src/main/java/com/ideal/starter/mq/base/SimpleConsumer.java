@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.config.MQProperties;
 import com.ideal.starter.mq.model.DomainEvent;
+import com.ideal.starter.mq.model.EventReceiveStatus;
 import com.ideal.starter.mq.model.EventReceiveTable;
 import com.ideal.starter.mq.service.DomainEventRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -94,23 +96,24 @@ public class SimpleConsumer {
 
     protected void handleMessage(MessageExt messageExt) {
         for (MethodInfo methodInfo : subscribers) {
-            RocketMQConsumerListener subscriber = methodInfo.getMethod().getAnnotation(RocketMQConsumerListener.class);
+            Method method = methodInfo.getMethod();
+            RocketMQConsumerListener subscriber = method.getAnnotation(RocketMQConsumerListener.class);
             if (isMatch(subscriber, messageExt)) {
                 Object object = doConvertMessage(messageExt, subscriber.messageType());
                 if (object instanceof DomainEvent) {
                     ((DomainEvent) object).setMsgId(messageExt.getMsgId());
                 }
-                EventReceiveTable receiveTable = domainEventRepository.getEventTableByListener(subscriber.name(), subscriber.messageMode(), subscriber.consumerGroup(), subscriber.topic(), subscriber.tag(), messageExt.getMsgId());
+                EventReceiveTable receiveTable = domainEventRepository.getEventTableByListener(method.getName(), subscriber.messageMode(), subscriber.consumerGroup(), subscriber.topic(), subscriber.tag(), messageExt.getMsgId());
                 if (receiveTable == null) {
-                    domainEventRepository.saveNeedToProcessEvents(Arrays.asList((DomainEvent) object), subscriber);
+                    receiveTable = domainEventRepository.saveNeedToProcessEvents((DomainEvent) object, subscriber,method.getName());
                 } else {
                     continue;
                 }
                 try {
                     methodInfo.invoke(object);
-                    domainEventRepository.updateReceiveStatusToProcessed(subscriber.name(), subscriber.messageMode(), subscriber.consumerGroup(), subscriber.topic(), subscriber.tag(), messageExt.getMsgId());
+                    domainEventRepository.updateReceiveStatusToProcessed(receiveTable.getId(), EventReceiveStatus.PROCESSED,new Date());
                 } catch (InvocationTargetException | IllegalAccessException e) {
-                    log.error("invoke method {} failed ", methodInfo.getMethod().getName());
+                    log.error("invoke method {} failed ", method.getName());
                 }
 
             }

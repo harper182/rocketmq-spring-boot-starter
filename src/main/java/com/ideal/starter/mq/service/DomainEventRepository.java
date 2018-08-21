@@ -6,7 +6,6 @@ import com.ideal.starter.mq.annotation.RocketMQConsumerListener;
 import com.ideal.starter.mq.mapper.EventReceiveTableMapper;
 import com.ideal.starter.mq.mapper.EventSendTableMapper;
 import com.ideal.starter.mq.model.*;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
@@ -24,31 +23,34 @@ public class DomainEventRepository {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus,String msgId) {
-        updateSendStatus(eventId, eventStatus, msgId,null);
+    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus, String msgId) {
+        updateSendStatus(eventId, eventStatus, msgId, null);
     }
 
-    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus,String msgId, Integer retryTime) {
+    public void updateSendStatus(Integer eventId, EventSendStatus eventStatus, String msgId, Integer retryTime) {
         eventSendTableMapper.updateEventTableStatus(eventId, eventStatus, msgId, new Date(), new Date(), retryTime);
     }
 
-    public void updateReceiveStatusToProcessed(String listenerName ,String messageMode,String consumerGroup,String topic, String tag, String msgId){
-        this.updateReceiveStatusToProcessed(listenerName, messageMode, consumerGroup, topic, tag, msgId,null);
-    }
-    public void updateReceiveStatusToProcessed(String listenerName ,String messageMode,String consumerGroup,String topic, String tag, String msgId,Integer retryTime){
-        eventReceiveTableMapper.updateReceiveStatusToProcessed(listenerName ,messageMode, consumerGroup, topic, tag, msgId,EventReceiveStatus.PROCESSED,new Date(),retryTime);
+    public void updateReceiveStatusToProcessed(Integer id, EventReceiveStatus eventStatus, Date processTime) {
+        this.updateReceiveStatusToProcessed(id, eventStatus, processTime, false);
     }
 
-    public void updateReceiveStatus(String msgId, EventReceiveStatus eventStatus, Integer retryTimess) {
-        eventReceiveTableMapper.updateEventTableStatus(msgId, eventStatus, new Date(), new Date(), retryTimess);
+    public void updateReceiveStatusToProcessed(Integer id, EventReceiveStatus eventStatus, Date processTime, boolean isRetry) {
+        eventReceiveTableMapper.updateReceiveStatusToProcessed(id, eventStatus, processTime, isRetry);
     }
 
-    public EventReceiveTable getEventReceiveTableByMsgId(String msgId) {
-        return eventReceiveTableMapper.getByMsgId(msgId);
+    public void addNonProcessEventRetryTime(Integer id, Date lastModifyTime) {
+        eventReceiveTableMapper.addNonProcessEventRetryTime(id, lastModifyTime);
     }
-    public EventReceiveTable getEventTableByListener(String listenerName ,String messageMode,String consumerGroup,String topic, String tag, String msgId){
-        return eventReceiveTableMapper.getEventTableByListener(listenerName ,messageMode, consumerGroup, topic, tag, msgId);
+
+    public void addSendWaitingEventRetryTime(Integer id, Date lastModifyTime) {
+        eventSendTableMapper.addSendWaitingEventRetryTime(id, lastModifyTime);
     }
+
+    public EventReceiveTable getEventTableByListener(String listenerName, String messageMode, String consumerGroup, String topic, String tag, String msgId) {
+        return eventReceiveTableMapper.getEventTableByListener(listenerName, messageMode, consumerGroup, topic, tag, msgId);
+    }
+
     public boolean saveNeedToSendEvents(List<DomainEvent> domainEvents) {
         domainEvents.stream().forEach(domainEvent -> {
             EventSendTable eventReceiveTable = this.saveNeedToSendEvent(domainEvent);
@@ -57,20 +59,18 @@ public class DomainEventRepository {
         return true;
     }
 
-    public boolean saveNeedToProcessEvents(List<DomainEvent> domainEvents, RocketMQConsumerListener consumerListener) {
-        domainEvents.stream().forEach(domainEvent -> {
-            EventReceiveTable eventReceiveTable = this.saveNeedToProcessEvent(domainEvent,consumerListener);
-            domainEvent.setEventId(eventReceiveTable.getId());
-        });
-        return true;
+    public EventReceiveTable saveNeedToProcessEvents(DomainEvent domainEvent, RocketMQConsumerListener consumerListener, String method) {
+        EventReceiveTable eventReceiveTable = this.saveNeedToProcessEvent(domainEvent, consumerListener, method);
+        domainEvent.setEventId(eventReceiveTable.getId());
+        return eventReceiveTable;
     }
 
-    public List<EventSendTable> getNeedToSendDomainEventList(Date beforeDate, EventSendStatus eventStatus,int retryTime,int limitCount) {
-        return eventSendTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime,limitCount);
+    public List<EventSendTable> getNeedToSendDomainEventList(Date beforeDate, EventSendStatus eventStatus, int retryTime, int limitCount) {
+        return eventSendTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus, retryTime, limitCount);
     }
 
-    public List<EventReceiveTable> getNeedToProcessDomainEventList(Date beforeDate, EventReceiveStatus eventStatus,int retryTime,int limitCount) {
-        return eventReceiveTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus,retryTime,limitCount);
+    public List<EventReceiveTable> getNeedToProcessDomainEventList(Date beforeDate, EventReceiveStatus eventStatus, int retryTime, int limitCount) {
+        return eventReceiveTableMapper.getEventTablesBeforeDate(beforeDate, eventStatus, retryTime, limitCount);
     }
 
     private EventSendTable saveNeedToSendEvent(DomainEvent domainEvent) {
@@ -81,13 +81,13 @@ public class DomainEventRepository {
         return eventSendTable;
     }
 
-    private EventReceiveTable saveNeedToProcessEvent(DomainEvent domainEvent,RocketMQConsumerListener consumerListener) {
+    private EventReceiveTable saveNeedToProcessEvent(DomainEvent domainEvent, RocketMQConsumerListener consumerListener, String method) {
         EventReceiveTable eventReceiveTable = new EventReceiveTable();
         updateTableInfo(domainEvent, eventReceiveTable);
         eventReceiveTable.setEventStatus(EventReceiveStatus.NON_PROCESSED);
         eventReceiveTable.setConsumerGroup(consumerListener.consumerGroup());
         eventReceiveTable.setMessageMode(consumerListener.messageMode());
-        eventReceiveTable.setListenerName(consumerListener.name());
+        eventReceiveTable.setListenerName(method);
         eventReceiveTableMapper.save(eventReceiveTable);
         return eventReceiveTable;
     }

@@ -19,4 +19,6 @@ public interface EventSendTableMapper {
     void updateEventTableStatus(@Param("id") Integer id, @Param("eventStatus") EventSendStatus eventStatus, @Param("msgId") String msgId, @Param("sendTime") Date sendTime,
                                 @Param("lastModifyTime") Date lastModifyTime, @Param("retryTime") Integer retryTime);
 
+    void addSendWaitingEventRetryTime(@Param("id") Integer id, @Param("lastModifyTime") Date lastModifyTime);
+
 }

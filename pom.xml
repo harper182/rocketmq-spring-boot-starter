@@ -23,7 +23,7 @@
 
     <groupId>com.ideal</groupId>
     <artifactId>spring-boot-starter-rocketmq</artifactId>
-    <version>1.0.60</version>
+    <version>1.0.67</version>
     <distributionManagement>
         <repository>
             <id>nexus</id>

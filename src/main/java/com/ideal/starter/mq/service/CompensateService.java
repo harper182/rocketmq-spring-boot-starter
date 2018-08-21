@@ -35,14 +35,15 @@ public class CompensateService {
     private MQProperties mqProperties;
 
     public void compensateMessageNeedToProcess() {
-        List<EventReceiveTable> needToProcessDomainEventList = domainEventRepository.getNeedToProcessDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateSendTime()), EventReceiveStatus.NON_PROCESSED,mqProperties.getMessageRetryMaxTime(),mqProperties.getCompensateReceiveLimit());
+        List<EventReceiveTable> needToProcessDomainEventList = domainEventRepository.getNeedToProcessDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateSendTime()), EventReceiveStatus.NON_PROCESSED, mqProperties.getMessageRetryMaxTime(), mqProperties.getCompensateReceiveLimit());
         for (EventReceiveTable eventTable : needToProcessDomainEventList) {
-            int retryTime = 1;
-            List<MethodInfo> methodInfos = listenerInfoCache.getMethodInfoByListenerInfo(eventTable.getConsumerGroup(), eventTable.getMessageMode(), eventTable.getTopic(), eventTable.getTag(),eventTable.getListenerName());
+            int retryTime = eventTable.getRetryTime();
+            List<MethodInfo> methodInfos = listenerInfoCache.getMethodInfoByListenerInfo(eventTable.getConsumerGroup(), eventTable.getMessageMode(), eventTable.getTopic(), eventTable.getTag(), eventTable.getListenerName());
             if (CollectionUtils.isEmpty(methodInfos)) {
                 continue;
             }
             String message = eventTable.getMessage();
+            boolean retrySuccess = false;
             while (retryTime <= mqProperties.getMessageRetryMaxTime()) {
                 for (MethodInfo methodInfo : methodInfos) {
                     Method method = methodInfo.getMethod();
@@ -50,12 +51,17 @@ public class CompensateService {
                     try {
                         DomainEvent messageObj = (DomainEvent) objectMapper.readValue(message, annotation.messageType());
                         method.invoke(methodInfo.getBean(), new Object[]{messageObj});
-                        domainEventRepository.updateReceiveStatusToProcessed(annotation.name(), annotation.messageMode(), annotation.consumerGroup(), annotation.topic(), annotation.tag(), eventTable.getMsgId(),retryTime);
+                        domainEventRepository.updateReceiveStatusToProcessed(eventTable.getId(), EventReceiveStatus.PROCESSED, new Date(), true);
+                        retrySuccess = true;
                         log.info("success to compensate message msgId: {},retryTime: {}", eventTable.getMsgId(), retryTime);
-                        return;
+                        break;
                     } catch (Exception e) {
+                        domainEventRepository.addNonProcessEventRetryTime(eventTable.getId(), new Date());
                         log.error("compensate message needed to process ,retry to process msgId: {} failed,retryTime:{},error:{}", eventTable.getMsgId(), retryTime, e.getMessage());
                     }
+                }
+                if (retrySuccess) {
+                    break;
                 }
                 retryTime++;
             }
@@ -66,21 +72,23 @@ public class CompensateService {
     }
 
     public void compensateMessageNeedToSend() {
-        List<EventSendTable> needToSendDomainEventList = domainEventRepository.getNeedToSendDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateReceiveTime()), EventSendStatus.SEND_WAITING,mqProperties.getMessageRetryMaxTime(),mqProperties.getCompensateSendLimit());
+        List<EventSendTable> needToSendDomainEventList = domainEventRepository.getNeedToSendDomainEventList(DateUtils.addMinutes(new Date(), -1 * mqProperties.getCompensateReceiveTime()), EventSendStatus.SEND_WAITING, mqProperties.getMessageRetryMaxTime(), mqProperties.getCompensateSendLimit());
         needToSendDomainEventList.forEach(domainEvent -> {
-            int retryTime = 1;
+            int retryTime = domainEvent.getRetryTime();
             while (retryTime <= mqProperties.getMessageRetryMaxTime()) {
                 try {
                     SendResult sendResult = commonProducer.syncSend(domainEvent.getTopic() + ":" + domainEvent.getTag(), domainEvent.getMessage());
                     if (sendResult.getSendStatus() == SendStatus.SEND_OK) {
-                        domainEventRepository.updateSendStatus(domainEvent.getId(), EventSendStatus.SENT,sendResult.getMsgId(), retryTime);
+                        domainEventRepository.updateSendStatus(domainEvent.getId(), EventSendStatus.SENT, sendResult.getMsgId(), retryTime);
                         log.info("compensate message to send successfully,eventId:{},retryTime:{}", domainEvent.getId(), retryTime);
                         break;
                     } else {
+                        domainEventRepository.addSendWaitingEventRetryTime(domainEvent.getId(), new Date());
                         retryTime++;
                         continue;
                     }
                 } catch (Exception e) {
+                    domainEventRepository.addSendWaitingEventRetryTime(domainEvent.getId(), new Date());
                     log.error("compensate message needed to send ,retry to send message: {} failed,retryTime:{}", domainEvent.getId(), retryTime);
                     retryTime++;
                 }

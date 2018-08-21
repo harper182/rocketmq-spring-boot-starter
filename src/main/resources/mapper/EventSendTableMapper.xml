@@ -73,4 +73,13 @@
         </set>
         WHERE id = #{id,jdbcType=INTEGER}
     </update>
+    <update id="addSendWaitingEventRetryTime">
+        UPDATE event_send_table
+        <set>
+            modifyNumber = modifyNumber + 1,
+            lastModifyTime = #{lastModifyTime,jdbcType=TIMESTAMP},
+            retryTime = retryTime + 1,
+        </set>
+        WHERE id = #{id,jdbcType=INTEGER}
+    </update>
 </mapper>

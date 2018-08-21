@@ -27,7 +27,5 @@ public @interface RocketMQConsumerListener {
 
     String tag() default "*";
 
-    String name() default "DEFAULT_LISTENER";
-
     Class messageType() default String.class;
 }
